@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { navForRole, type AppRole } from '@/lib/roles';
+import SideNav from '@/components/side-nav';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -39,14 +39,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="brand">I&amp;S General Supplies</div>
-        <nav>
-          {nav.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="brand">
+          I&amp;S General Supplies
+          <small>Aluminium · Glass · Mombasa</small>
+        </div>
+        <SideNav items={nav.map(({ label, href }) => ({ label, href }))} />
         <div className="sidebar-footer">
           <div className="user-name">{profile.full_name || user.email}</div>
           <div className="user-role">{profile.role.replace('_', ' ')}</div>
