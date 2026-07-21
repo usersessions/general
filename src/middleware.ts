@@ -29,7 +29,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isPublic = pathname.startsWith('/login') || pathname.startsWith('/auth');
+  const isPublic =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/pay') ||          // public invoice payment page
+    pathname.startsWith('/api/mpesa');      // Daraja endpoints (token-gated)
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();

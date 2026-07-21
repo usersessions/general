@@ -12,6 +12,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
     .single();
   if (!inv) notFound();
   const { data: totals } = await supabase.from('v_invoice_totals').select('*').eq('invoice_id', id).single();
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('*')
+    .eq('invoice_id', id)
+    .order('created_at', { ascending: false });
 
   return (
     <>
@@ -43,6 +48,32 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         )}
       </div>
       <InvoiceActions invoiceId={inv.id} status={inv.status} />
+      {(payments ?? []).length > 0 && (
+        <div className="card">
+          <h3>Payments</h3>
+          <table>
+            <thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Receipt</th><th>Status</th></tr></thead>
+            <tbody>
+              {(payments ?? []).map((p: any) => (
+                <tr key={p.id}>
+                  <td>{p.created_at.slice(0, 16).replace('T', ' ')}</td>
+                  <td>{p.method}</td>
+                  <td>{Number(p.amount).toLocaleString()}</td>
+                  <td>{p.mpesa_receipt_number ?? '-'}</td>
+                  <td>{p.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {['issued', 'partially_paid'].includes(inv.status) && inv.payment_token && (
+        <div className="card">
+          <p className="muted">
+            Client payment link: {process.env.NEXT_PUBLIC_APP_URL}/pay/{inv.payment_token}
+          </p>
+        </div>
+      )}
     </>
   );
 }
