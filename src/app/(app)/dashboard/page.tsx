@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { navForRole, type AppRole } from '@/lib/roles';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -12,7 +14,8 @@ export default async function DashboardPage() {
     .eq('id', user!.id)
     .single();
 
-  const department = profile?.department as { name: string } | null;
+  const department = profile?.department as unknown as { name: string } | null;
+  const sections = navForRole((profile?.role ?? 'workshop') as AppRole).filter((s) => s.href !== '/dashboard');
 
   return (
     <>
@@ -20,21 +23,27 @@ export default async function DashboardPage() {
       <p className="muted">
         Welcome back{profile?.full_name ? `, ${profile.full_name}` : ''}.
       </p>
-      <div className="cards">
-        <div className="card">
-          <h3>Role</h3>
-          <p>{profile?.role.replace('_', ' ')}</p>
+      <div className="kpi-grid">
+        <div className="kpi">
+          <div className="kpi-label">Role</div>
+          <div className="kpi-value" style={{ fontSize: '1.125rem', textTransform: 'capitalize' }}>
+            {profile?.role.replace('_', ' ')}
+          </div>
         </div>
-        <div className="card">
-          <h3>Department</h3>
-          <p>{department?.name ?? 'Unassigned'}</p>
+        <div className="kpi">
+          <div className="kpi-label">Department</div>
+          <div className="kpi-value" style={{ fontSize: '1.125rem' }}>{department?.name ?? 'Unassigned'}</div>
         </div>
       </div>
       <div className="card">
-        <p className="muted">
-          Module dashboards (stock levels, receivables, attendance) arrive with their
-          respective phases.
-        </p>
+        <h3>Your workspaces</h3>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {sections.map((s) => (
+            <Link key={s.href} href={s.href} className="btn-secondary" style={{ textDecoration: 'none' }}>
+              {s.label}
+            </Link>
+          ))}
+        </div>
       </div>
     </>
   );
