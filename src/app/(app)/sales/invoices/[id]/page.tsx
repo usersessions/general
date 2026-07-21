@@ -24,6 +24,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
       <p className="muted">
         {inv.client?.name} · {inv.status}
         {inv.due_date ? ` · due ${inv.due_date}` : ''}
+        {inv.fiscal_document_number ? ` · KRA FDN: ${inv.fiscal_document_number}` : ''}
       </p>
       <div className="card">
         <table>

@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/etims/process", "schedule": "*/10 * * * *" }
+  ]
+}

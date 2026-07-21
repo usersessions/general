@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/login') ||
     pathname.startsWith('/auth') ||
     pathname.startsWith('/pay') ||          // public invoice payment page
-    pathname.startsWith('/api/mpesa');      // Daraja endpoints (token-gated)
+    pathname.startsWith('/api/mpesa') ||    // Daraja endpoints (token-gated)
+    pathname.startsWith('/api/etims');      // cron processor (CRON_SECRET-gated)
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
