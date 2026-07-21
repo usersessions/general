@@ -34,7 +34,10 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/pay') ||          // public invoice payment page
     pathname.startsWith('/api/mpesa') ||    // Daraja endpoints (token-gated)
-    pathname.startsWith('/api/etims');      // cron processor (CRON_SECRET-gated)
+    pathname.startsWith('/api/etims') ||    // cron processor (CRON_SECRET-gated)
+    pathname.startsWith('/kiosk') ||        // attendance kiosk PWA (device-key gated)
+    pathname.startsWith('/api/attendance') || // scan endpoint (device-key gated)
+    pathname === '/manifest.json';
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
