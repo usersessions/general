@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PoActions from './po-actions';
+import StatusBadge from '@/components/status-badge';
 
 export default async function PoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -18,8 +19,10 @@ export default async function PoPage({ params }: { params: Promise<{ id: string 
 
   return (
     <>
-      <h1>{po.po_number}</h1>
-      <p className="muted">{po.supplier?.name} · {po.status}</p>
+      <h1 className="mono">{po.po_number}</h1>
+      <p className="muted" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        {po.supplier?.name} <StatusBadge status={po.status} />
+      </p>
       <div className="card">
         <table>
           <thead><tr><th>Product</th><th>Dimensions (mm)</th><th>Qty</th><th>Unit cost</th><th>Total</th></tr></thead>
@@ -35,7 +38,7 @@ export default async function PoPage({ params }: { params: Promise<{ id: string 
             ))}
           </tbody>
         </table>
-        <p style={{ textAlign: 'right' }}><strong>Total: KES {Number(totals?.total ?? 0).toLocaleString()}</strong></p>
+        <p className="mono" style={{ textAlign: 'right' }}><strong>Total KES {Number(totals?.total ?? 0).toLocaleString()}</strong></p>
       </div>
       <PoActions poId={po.id} status={po.status} canApprove={canApprove} />
     </>

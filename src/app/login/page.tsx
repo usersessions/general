@@ -33,8 +33,12 @@ export default function LoginPage() {
     <main className="auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
         <h1>I&amp;S General Supplies</h1>
-        <p className="muted">Sign in to continue</p>
-        {error && <p className="error">{error}</p>}
+        <p className="muted" style={{ marginTop: '-0.5rem' }}>
+          <span className="mono" style={{ fontSize: '0.6875rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            Aluminium · Glass · Mombasa
+          </span>
+        </p>
+        {error && <p className="flash-err">{error}</p>}
         <label>
           Email
           <input

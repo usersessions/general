@@ -38,7 +38,7 @@ export default function UsersTable({
 
   return (
     <div className="card">
-      {error && <p className="error">{error}</p>}
+      {error && <p className="flash-err">{error}</p>}
       <table>
         <thead>
           <tr>
