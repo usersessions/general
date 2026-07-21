@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import InvoiceActions from './invoice-actions';
+import StatusBadge from '@/components/status-badge';
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,11 +21,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
   return (
     <>
-      <h1>{inv.invoice_number}</h1>
-      <p className="muted">
-        {inv.client?.name} · {inv.status}
-        {inv.due_date ? ` · due ${inv.due_date}` : ''}
-        {inv.fiscal_document_number ? ` · KRA FDN: ${inv.fiscal_document_number}` : ''}
+      <h1 className="mono">{inv.invoice_number}</h1>
+      <p className="muted" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {inv.client?.name} <StatusBadge status={inv.status} />
+        {inv.due_date ? <span className="mono">due {inv.due_date}</span> : null}
+        {inv.fiscal_document_number ? <span className="mono">KRA FDN {inv.fiscal_document_number}</span> : null}
       </p>
       <div className="card">
         <table>
@@ -40,11 +41,11 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           </tbody>
         </table>
         {totals && (
-          <p style={{ textAlign: 'right' }}>
-            Subtotal: KES {Number(totals.subtotal).toLocaleString()}<br />
-            VAT ({inv.vat_rate}%): KES {Number(totals.vat_amount).toLocaleString()}<br />
-            <strong>Total: KES {Number(totals.total).toLocaleString()}</strong><br />
-            Paid: KES {Number(inv.amount_paid).toLocaleString()}
+          <p className="mono" style={{ textAlign: 'right', lineHeight: 1.9 }}>
+            <span className="muted">Subtotal</span> KES {Number(totals.subtotal).toLocaleString()}<br />
+            <span className="muted">VAT ({inv.vat_rate}%)</span> KES {Number(totals.vat_amount).toLocaleString()}<br />
+            <strong>Total KES {Number(totals.total).toLocaleString()}</strong><br />
+            <span className="muted">Paid</span> KES {Number(inv.amount_paid).toLocaleString()}
           </p>
         )}
       </div>

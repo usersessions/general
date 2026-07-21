@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import OrderActions from './order-actions';
+import StatusBadge from '@/components/status-badge';
 
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,10 +21,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <h1>{order.order_number}</h1>
-      <p className="muted">
-        {order.client?.name} · {order.status}
-        {order.quotation ? <> · from quote {order.quotation.quote_number}</> : null}
+      <h1 className="mono">{order.order_number}</h1>
+      <p className="muted" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {order.client?.name} <StatusBadge status={order.status} />
+        {order.quotation ? <span className="mono">from {order.quotation.quote_number}</span> : null}
       </p>
       <div className="card">
         <h3>Reserved stock units</h3>

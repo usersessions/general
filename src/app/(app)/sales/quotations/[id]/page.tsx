@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import QuoteActions from './quote-actions';
+import StatusBadge from '@/components/status-badge';
 
 export default async function QuotationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,8 +17,11 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
 
   return (
     <>
-      <h1>{q.quote_number}</h1>
-      <p className="muted">{q.client?.name} · {q.status}{q.valid_until ? ` · valid until ${q.valid_until}` : ''}</p>
+      <h1 className="mono">{q.quote_number}</h1>
+      <p className="muted" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        {q.client?.name} <StatusBadge status={q.status} />
+        {q.valid_until ? <span className="mono">valid until {q.valid_until}</span> : null}
+      </p>
       <div className="card">
         <table>
           <thead><tr><th>Description</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead>
@@ -32,10 +36,10 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
           </tbody>
         </table>
         {totals && (
-          <p style={{ textAlign: 'right' }}>
-            Subtotal: KES {Number(totals.subtotal).toLocaleString()}<br />
-            VAT ({q.vat_rate}%): KES {Number(totals.vat_amount).toLocaleString()}<br />
-            <strong>Total: KES {Number(totals.total).toLocaleString()}</strong>
+          <p className="mono" style={{ textAlign: 'right', lineHeight: 1.9 }}>
+            <span className="muted">Subtotal</span> KES {Number(totals.subtotal).toLocaleString()}<br />
+            <span className="muted">VAT ({q.vat_rate}%)</span> KES {Number(totals.vat_amount).toLocaleString()}<br />
+            <strong>Total KES {Number(totals.total).toLocaleString()}</strong>
           </p>
         )}
       </div>
