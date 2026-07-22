@@ -13,7 +13,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const [{ data: units }, { data: batches }] = await Promise.all([
     supabase
       .from('stock_units')
-      .select('*, parent:stock_units!stock_units_parent_unit_id_fkey(length_mm, width_mm)')
+      .select('*, parent:stock_units!parent_unit_id(length_mm, width_mm)')
       .eq('product_id', id)
       .neq('status', 'consumed')
       .order('created_at', { ascending: false }),

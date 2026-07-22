@@ -20,7 +20,7 @@ export default function OffcutSearchPage() {
     setBusy(true); setError(null);
     let q = supabase
       .from('stock_units')
-      .select('*, product:products!inner(name, category), parent:stock_units!stock_units_parent_unit_id_fkey(length_mm, width_mm)')
+      .select('*, product:products!inner(name, category), parent:stock_units!parent_unit_id(length_mm, width_mm)')
       .eq('status', 'offcut');
     if (f.category) q = q.eq('products.category', f.category);
     if (f.thickness) q = q.eq('thickness_mm', Number(f.thickness));
