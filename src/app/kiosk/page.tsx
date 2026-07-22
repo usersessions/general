@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import jsQR from 'jsqr';
 
 // Kiosk design mode: opposite of the app. High contrast, huge type,
 // full-screen state color, zero navigation, legible from a distance.
@@ -51,29 +52,44 @@ export default function KioskPage() {
   }
 
   async function startCamera() {
-    if (!('BarcodeDetector' in window)) {
-      setFlash({ kind: 'error', text: 'NO CAMERA SCANNER', sub: 'Type the badge code below instead' });
-      setTimeout(() => setFlash(null), 4000);
-      return;
-    }
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      await videoRef.current.play();
-    }
-    setScanning(true);
-    const detector = new (window as any).BarcodeDetector({ formats: ['qr_code'] });
-    const tick = async () => {
-      if (!videoRef.current) return;
-      try {
-        const codes = await detector.detect(videoRef.current);
-        if (codes.length > 0 && !busyRef.current) {
-          await submitScan(codes[0].rawValue.trim());
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute("playsinline", "true");
+        await videoRef.current.play();
+      }
+      setScanning(true);
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      
+      const tick = async () => {
+        if (!videoRef.current || videoRef.current.readyState !== videoRef.current.HAVE_ENOUGH_DATA) {
+          requestAnimationFrame(tick);
+          return;
         }
-      } catch { /* keep scanning */ }
+        
+        canvas.height = videoRef.current.videoHeight;
+        canvas.width = videoRef.current.videoWidth;
+        if (ctx) {
+          ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert",
+          });
+          
+          if (code && !busyRef.current) {
+            await submitScan(code.data.trim());
+          }
+        }
+        requestAnimationFrame(tick);
+      };
       requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
+    } catch (err) {
+      setFlash({ kind: 'error', text: 'CAMERA ERROR', sub: 'Please grant camera permissions' });
+      setTimeout(() => setFlash(null), 4000);
+    }
   }
 
   const base: React.CSSProperties = {
