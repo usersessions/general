@@ -66,9 +66,12 @@ export interface DocData {
   dueDate?: string | null;
   clientName: string;
   clientLocation?: string | null;
+  clientPhone?: string | null;
   lines: DocLine[];
   vatRate: number;
   notes?: string | null;
+  discount?: number | null;
+  margin?: number | null;
   fiscalDocumentNumber?: string | null;
 }
 
@@ -93,6 +96,7 @@ function BusinessDocument({ data }: { data: DocData }) {
             <View>
               <Text style={styles.metaLabel}>Bill to</Text>
               <Text style={styles.metaValue}>{data.clientName}</Text>
+              {data.clientPhone ? <Text style={{ fontSize: 9, color: ANODITE }}>{data.clientPhone}</Text> : null}
               {data.clientLocation ? <Text style={{ fontSize: 9, color: ANODITE }}>{data.clientLocation}</Text> : null}
             </View>
             <View>
@@ -133,13 +137,21 @@ function BusinessDocument({ data }: { data: DocData }) {
               <Text style={{ color: ANODITE }}>Subtotal</Text>
               <Text style={styles.amount}>{kes(subtotal)}</Text>
             </View>
-            <View style={styles.totalRow}>
-              <Text style={{ color: ANODITE }}>VAT ({data.vatRate}%)</Text>
-              <Text style={styles.amount}>{kes(vat)}</Text>
-            </View>
+            {data.discount ? (
+              <View style={styles.totalRow}>
+                <Text style={{ color: ANODITE }}>Discount</Text>
+                <Text style={styles.amount}>-{kes(data.discount)}</Text>
+              </View>
+            ) : null}
+            {data.vatRate > 0 ? (
+              <View style={styles.totalRow}>
+                <Text style={{ color: ANODITE }}>VAT ({data.vatRate}%)</Text>
+                <Text style={styles.amount}>{kes(vat)}</Text>
+              </View>
+            ) : null}
             <View style={[styles.totalRow, styles.grand]}>
               <Text style={styles.grandText}>Total</Text>
-              <Text style={[styles.grandText, { fontFamily: 'PlexMono' }]}>{kes(subtotal + vat)}</Text>
+              <Text style={[styles.grandText, { fontFamily: 'PlexMono' }]}>{kes(subtotal - (data.discount || 0) + vat)}</Text>
             </View>
           </View>
 
