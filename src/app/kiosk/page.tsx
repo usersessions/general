@@ -23,7 +23,7 @@ export default function KioskPage() {
   useEffect(() => {
     setDeviceKey(localStorage.getItem('kiosk_device_key'));
     const t = setInterval(() => {
-      setNow(new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setNow(new Date().toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Africa/Nairobi' }));
     }, 1000);
     return () => clearInterval(t);
   }, []);
