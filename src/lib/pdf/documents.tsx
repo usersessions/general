@@ -71,7 +71,6 @@ export interface DocData {
   vatRate: number;
   notes?: string | null;
   discount?: number | null;
-  margin?: number | null;
   fiscalDocumentNumber?: string | null;
 }
 

@@ -81,7 +81,6 @@ export async function loadQuotationDoc(supabase: SupabaseClient, id: string) {
     vatRate: calcState?.vatOn ? Number(calcState.vatRate) : Number(q.vat_rate),
     notes: userNotes,
     discount: discount > 0 ? discount : null,
-    margin: margin > 0 ? margin : null,
   };
   return { record: q, doc };
 }
