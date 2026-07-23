@@ -21,6 +21,7 @@ const ALL_ROLES: readonly AppRole[] = APP_ROLES;
 // Navigation visibility is UX only. Real enforcement is Postgres RLS.
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/dashboard', roles: ALL_ROLES },
+  { label: 'My Activities', href: '/activities', roles: ALL_ROLES },
   {
     label: 'Inventory',
     href: '/inventory',
