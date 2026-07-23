@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import PoActions from './po-actions';
+import ReceiptUploader from './receipt-uploader';
 import StatusBadge from '@/components/status-badge';
 
 export default async function PoPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,7 +16,9 @@ export default async function PoPage({ params }: { params: Promise<{ id: string 
   const { data: totals } = await supabase.from('v_po_totals').select('total').eq('purchase_order_id', id).single();
 
   const { data: me } = await supabase.from('profiles').select('role').eq('id', (await supabase.auth.getUser()).data.user!.id).single();
-  const canApprove = ['finance', 'admin', 'super_admin'].includes(me?.role ?? '');
+  const role = me?.role ?? '';
+  const canApprove = ['finance', 'admin', 'super_admin'].includes(role);
+  const canUpload = ['procurement', 'finance', 'admin', 'super_admin'].includes(role);
 
   return (
     <>
@@ -40,6 +43,9 @@ export default async function PoPage({ params }: { params: Promise<{ id: string 
         </table>
         <p className="mono" style={{ textAlign: 'right' }}><strong>Total KES {Number(totals?.total ?? 0).toLocaleString()}</strong></p>
       </div>
+
+      <ReceiptUploader poId={po.id} existingUrl={po.receipt_url} canUpload={canUpload} />
+
       <PoActions poId={po.id} status={po.status} canApprove={canApprove} />
     </>
   );
