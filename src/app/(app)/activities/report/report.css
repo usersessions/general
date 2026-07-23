@@ -1,0 +1,120 @@
+.report-page {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-radius: 8px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #111827;
+}
+
+.report-header {
+  border-bottom: 2px solid #E5E7EB;
+  padding-bottom: 24px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.report-title h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #111827;
+}
+
+.report-title p {
+  margin: 0;
+  color: #4B5563;
+  font-size: 15px;
+}
+
+.report-meta {
+  text-align: right;
+  color: #6B7280;
+  font-size: 13px;
+}
+
+.section-title {
+  font-size: 18px;
+  color: #374151;
+  margin: 32px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 32px;
+  font-size: 14px;
+}
+
+.report-table th, .report-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #E5E7EB;
+  vertical-align: top;
+}
+
+.report-table th {
+  background: #F9FAFB;
+  font-weight: 600;
+  color: #374151;
+}
+
+.col-date { width: 120px; white-space: nowrap; }
+.col-task { width: 200px; font-weight: 500; }
+.col-outcome { color: #4B5563; }
+
+.empty-state {
+  padding: 32px;
+  text-align: center;
+  color: #9CA3AF;
+  font-style: italic;
+  background: #F9FAFB;
+  border-radius: 6px;
+}
+
+.signature-block {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sig-line {
+  width: 250px;
+}
+
+.sig-line .line {
+  border-bottom: 1px solid #374151;
+  height: 40px;
+  margin-bottom: 8px;
+}
+
+.sig-line .label {
+  font-size: 13px;
+  color: #6B7280;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .sidebar, .top-nav, .no-print {
+    display: none !important;
+  }
+  .shell .content {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .report-page {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+  }
+  @page { margin: 1cm; }
+}

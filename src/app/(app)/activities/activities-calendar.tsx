@@ -120,17 +120,28 @@ export default function ActivitiesCalendar({ currentUserId, isManager, staffList
           <button className="btn-secondary" style={{padding: '6px 12px'}} onClick={nextMonth}>&rarr;</button>
         </div>
 
-        {isManager && (
-          <select 
-            className="select-staff" 
-            value={selectedStaff} 
-            onChange={(e) => setSelectedStaff(e.target.value)}
+        <div style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
+          <a 
+            href={`/activities/report?month=${year}-${String(month + 1).padStart(2, '0')}&staff=${selectedStaff}`} 
+            className="btn-primary" 
+            target="_blank"
+            style={{textDecoration: 'none'}}
           >
-            {staffList.map(s => (
-              <option key={s.id} value={s.id}>{s.full_name || 'Unnamed'} {s.id === currentUserId ? '(Me)' : ''}</option>
-            ))}
-          </select>
-        )}
+            Generate Report
+          </a>
+
+          {isManager && (
+            <select 
+              className="select-staff" 
+              value={selectedStaff} 
+              onChange={(e) => setSelectedStaff(e.target.value)}
+            >
+              {staffList.map(s => (
+                <option key={s.id} value={s.id}>{s.full_name || 'Unnamed'} {s.id === currentUserId ? '(Me)' : ''}</option>
+              ))}
+            </select>
+          )}
+        </div>
       </div>
 
       <div className="calendar-grid">
