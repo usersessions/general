@@ -26,10 +26,63 @@ export default function QuoteActions({ quotationId, status, orderId, orderNumber
 
   async function accept() {
     setBusy(true); setError(null);
-    const { data, error } = await supabase.rpc('accept_quotation', { p_quotation_id: quotationId });
+    const { data: orderId, error: accErr } = await supabase.rpc('accept_quotation', { p_quotation_id: quotationId });
+    if (accErr) { setError(accErr.message); setBusy(false); return; }
+
+    // Auto-allocate stock if this was a calculator quotation
+    const { data: q } = await supabase.from('quotations').select('notes').eq('id', quotationId).single();
+    if (q?.notes) {
+      try {
+        const state = JSON.parse(q.notes);
+        if (state.calculator) {
+          const reqs: any[] = [];
+          
+          const processItems = (items: any[], multiplier: number) => {
+            if (!items) return;
+            items.forEach((it: any) => {
+              if (it.product_id && it.qty > 0) {
+                const u = (it.unit || '').toLowerCase();
+                let length_mm = null;
+                let finalQty = it.qty * multiplier;
+                
+                // If it's a length-based unit, assume we need 1 piece of the total length per window/door
+                if (['ft', 'feet'].includes(u)) { length_mm = it.qty * 304.8; finalQty = multiplier; }
+                else if (['m', 'meter', 'meters'].includes(u)) { length_mm = it.qty * 1000; finalQty = multiplier; }
+                else if (['in', 'inch'].includes(u)) { length_mm = it.qty * 25.4; finalQty = multiplier; }
+                else if (u === 'mm') { length_mm = it.qty; finalQty = multiplier; }
+                else if (['sqft', 'sqm'].includes(u)) {
+                   // Glass is usually dimensional with area, but for auto-allocation we might treat it as count or standard piece
+                   // If it's area, we can't easily auto-cut it without width/height. We'll pass it without length_mm
+                }
+
+                reqs.push({
+                  product_id: it.product_id,
+                  qty: finalQty,
+                  length_mm: length_mm ? Math.round(length_mm) : null
+                });
+              }
+            });
+          };
+
+          processItems(state.windowItems, state.windowQty || 1);
+          processItems(state.doorItems, state.doorQty || 1);
+          processItems(state.customItems, 1);
+
+          if (reqs.length > 0) {
+            const { error: allocErr } = await supabase.rpc('auto_process_sales_order', { p_order_id: orderId, p_items: reqs });
+            if (allocErr) {
+              console.error('Allocation error:', allocErr);
+              // We won't block the redirect, but could show a warning
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse quote notes for allocation', e);
+      }
+    }
+
     setBusy(false);
-    if (error) { setError(error.message); return; }
-    router.push(`/sales/orders/${data}`);
+    router.push(`/sales/orders/${orderId}`);
   }
 
   async function reject() {

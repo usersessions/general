@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import '../quote-calculator.css';
 
 interface BOMItem {
+  product_id?: string;
   name: string;
   qty: number;
   unit: string;
@@ -14,6 +15,7 @@ interface BOMItem {
 
 interface CustomItem {
   id: number;
+  product_id?: string;
   desc: string;
   cost: number;
   qty: number;
@@ -25,6 +27,7 @@ export default function NewQuotationPage() {
   
   // DB client selection and general info
   const [clients, setClients] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [clientId, setClientId] = useState('');
   const [validUntil, setValidUntil] = useState('');
   const [notes, setNotes] = useState(''); // user notes
@@ -96,6 +99,11 @@ export default function NewQuotationPage() {
       .select('id, name, location, email, phone')
       .order('name')
       .then(({ data }) => setClients(data ?? []));
+      
+    supabase.from('v_product_stock')
+      .select('id, name, unit_type, standard_cost, tracking_mode')
+      .order('name')
+      .then(({ data }) => setProducts(data ?? []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -126,22 +134,24 @@ export default function NewQuotationPage() {
   const vat = vatOn ? subtotal * (vatRate / 100) : 0;
   const total = subtotal + vat;
 
-  const handleItemChange = (type: 'window' | 'door', index: number, field: 'qty' | 'unit' | 'price', value: any) => {
-    if (type === 'window') {
-      const updated = [...windowItems];
-      updated[index] = {
-        ...updated[index],
-        [field]: field === 'unit' ? value : (parseFloat(value) || 0)
-      };
-      setWindowItems(updated);
-    } else {
-      const updated = [...doorItems];
-      updated[index] = {
-        ...updated[index],
-        [field]: field === 'unit' ? value : (parseFloat(value) || 0)
-      };
-      setDoorItems(updated);
+  const handleItemChange = (listType: 'window' | 'door', index: number, field: keyof BOMItem, value: any) => {
+    const list = listType === 'window' ? [...windowItems] : [...doorItems];
+    if (field === 'product_id') {
+      const prod = products.find(p => p.id === value);
+      if (prod) {
+        list[index].product_id = prod.id;
+        list[index].name = prod.name;
+        list[index].unit = prod.unit_type;
+        list[index].price = Number(prod.standard_cost) || 0;
+      } else {
+        list[index].product_id = undefined;
+      }
+    } else if (field === 'qty' || field === 'price') {
+      list[index][field] = Number(value) || 0;
+    } else if (field === 'name' || field === 'unit') {
+      list[index][field] = value;
     }
+    listType === 'window' ? setWindowItems(list) : setDoorItems(list);
   };
 
   const addCustomItem = (e: React.MouseEvent) => {
@@ -511,7 +521,18 @@ export default function NewQuotationPage() {
                 <tbody>
                   {windowItems.map((it, idx) => (
                     <tr key={idx}>
-                      <td className="iname">{it.name}</td>
+                      <td className="iname">
+                        <select 
+                          className="product-select"
+                          value={it.product_id || ''}
+                          onChange={(e) => handleItemChange('window', idx, 'product_id', e.target.value)}
+                        >
+                          <option value="">{it.name} (Custom)</option>
+                          {products.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td>
                         <input 
                           className="qty" 
@@ -561,7 +582,18 @@ export default function NewQuotationPage() {
                 <tbody>
                   {doorItems.map((it, idx) => (
                     <tr key={idx}>
-                      <td className="iname">{it.name}</td>
+                      <td className="iname">
+                        <select 
+                          className="product-select"
+                          value={it.product_id || ''}
+                          onChange={(e) => handleItemChange('door', idx, 'product_id', e.target.value)}
+                        >
+                          <option value="">{it.name} (Custom)</option>
+                          {products.map(p => (
+                            <option key={p.id} value={p.id}>{p.name}</option>
+                          ))}
+                        </select>
+                      </td>
                       <td>
                         <input 
                           className="qty" 
