@@ -4,6 +4,7 @@ import React from 'react';
 import '../quote-calculator.css';
 
 interface QuoteDetailCalculatorProps {
+  quotationId: string;
   calculatorState: any;
   client: any;
   quoteNumber: string;
@@ -12,6 +13,7 @@ interface QuoteDetailCalculatorProps {
 }
 
 export default function QuoteDetailCalculator({
+  quotationId,
   calculatorState,
   client,
   quoteNumber,
@@ -39,14 +41,14 @@ export default function QuoteDetailCalculator({
 
   const linesList: any[] = [];
   if (windowQty > 0) {
-    linesList.push({ label: `Window (4ft × 4ft) × ${windowQty}`, cost: wCost * windowQty });
+    linesList.push({ label: `Window (4ft × 4ft) × ${windowQty}`, cost: wCost * windowQty, sell: wCost * windowQty * (1 + margin / 100) });
   }
   if (doorQty > 0) {
-    linesList.push({ label: `Hinge Door (3ft × 7ft) × ${doorQty}`, cost: dCost * doorQty });
+    linesList.push({ label: `Hinge Door (3ft × 7ft) × ${doorQty}`, cost: dCost * doorQty, sell: dCost * doorQty * (1 + margin / 100) });
   }
   customItems.forEach((item: any) => {
     if (item.qty > 0) {
-      linesList.push({ label: `${item.desc} × ${item.qty}`, cost: item.cost * item.qty });
+      linesList.push({ label: `${item.desc} × ${item.qty}`, cost: item.cost * item.qty, sell: item.cost * item.qty * (1 + margin / 100) });
     }
   });
 
@@ -56,6 +58,7 @@ export default function QuoteDetailCalculator({
   const subtotal = Math.max(0, subtotalBeforeDiscount - discount);
   const vat = vatOn ? subtotal * (vatRate / 100) : 0;
   const total = subtotal + vat;
+  const ratio = subtotalBeforeDiscount > 0 ? subtotal / subtotalBeforeDiscount : 0;
 
   const shareWhatsapp = () => {
     const biz = businessName;
@@ -65,8 +68,14 @@ export default function QuoteDetailCalculator({
 
     let msg = `*${biz}*\nQuotation ${quoteNo}${custName ? " for " + custName : ""}\n\n`;
     linesList.forEach(l => {
-      msg += `${l.label}: ${fmt(l.cost)}\n`;
+      // Show the unit selling price including profit and proportional discount
+      const finalItemPrice = l.sell * ratio;
+      msg += `${l.label}: ${fmt(finalItemPrice)}\n`;
     });
+    
+    if (vatOn) {
+      msg += `VAT (${vatRate}%): ${fmt(vat)}\n`;
+    }
     msg += `\n*Total Quote: ${totalText}*`;
 
     window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
@@ -255,7 +264,7 @@ export default function QuoteDetailCalculator({
           )}
 
           <div className="btn-row no-print" style={{ marginTop: '22px' }}>
-            <button type="button" className="btn primary" onClick={() => window.print()}>Print / Save PDF</button>
+            <button type="button" className="btn primary" onClick={() => window.open(`/api/quotations/${quotationId}/pdf`, '_blank')}>Print / Save PDF</button>
             <button type="button" className="btn whatsapp" onClick={shareWhatsapp}>Share on WhatsApp</button>
           </div>
         </div>

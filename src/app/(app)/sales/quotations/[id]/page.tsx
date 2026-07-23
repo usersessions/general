@@ -33,6 +33,7 @@ export default async function QuotationPage({ params }: { params: Promise<{ id: 
     <>
       {calculatorState ? (
         <QuoteDetailCalculator 
+          quotationId={q.id}
           calculatorState={calculatorState}
           client={q.client}
           quoteNumber={q.quote_number}
