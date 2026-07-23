@@ -6,14 +6,15 @@ import './report.css';
 export default async function ReportPage({
   searchParams
 }: {
-  searchParams: { month?: string; staff?: string }
+  searchParams: Promise<{ month?: string; staff?: string }>
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const monthParam = searchParams.month; // e.g. "2026-07"
-  const staffId = searchParams.staff;
+  const resolvedSearchParams = await searchParams;
+  const monthParam = resolvedSearchParams.month; // e.g. "2026-07"
+  const staffId = resolvedSearchParams.staff;
 
   if (!monthParam || !staffId) {
     return <div>Invalid parameters.</div>;
